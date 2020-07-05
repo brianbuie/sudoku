@@ -9,46 +9,21 @@ const NumberSelectorStyles = styled.div`
   justify-content: center;
 `;
 
-const NoteModeLabel = styled.label`
-  margin-top: 2rem;
-  text-align: center;
-  color: white;
-  cursor: pointer;
-  display: block;
-  & input {
-    cursor: pointer;
-  }
-`;
-
-const NumberSelector = ({
-  selectedNumber,
-  updateSelectedNumber,
-  noteMode,
-  updateNoteMode,
-}) => {
+const NumberSelector = ({ selectedNumber, updateSelectedNumber, noteMode }) => {
   return (
-    <>
-      <NumberSelectorStyles>
-        {arrayOf((i) => i, 9).map((i) => (
-          <Cell
-            key={i}
-            value={noteMode ? null : i}
-            notes={[i]}
-            thickRight={i % 3 === 0}
-            click={() => updateSelectedNumber(i)}
-            selectedNumber={selectedNumber}
-          />
-        ))}
-      </NumberSelectorStyles>
-      <NoteModeLabel>
-        <input
-          type="checkbox"
-          checked={noteMode}
-          onChange={() => updateNoteMode(!noteMode)}
+    <NumberSelectorStyles>
+      {arrayOf((i) => i, 9).map((i) => (
+        <Cell
+          key={i}
+          value={i}
+          mediumDigitSize={noteMode}
+          thickRight={i % 3 === 0}
+          click={() => updateSelectedNumber(i)}
+          selectedNumber={selectedNumber}
+          highlightLevel={selectedNumber === i ? 2 : 0}
         />
-        Notes
-      </NoteModeLabel>
-    </>
+      ))}
+    </NumberSelectorStyles>
   );
 };
 

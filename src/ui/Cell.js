@@ -3,10 +3,7 @@ import styled from "styled-components";
 import arrayOf from "../utils/arrayOf";
 
 const CellStyles = styled.div`
-  background: ${(props) =>
-    props.highlighted
-      ? props.theme.cellBkgHighlighted
-      : props.theme.cellBkgDefault};
+  background: ${(props) => props.theme.cellColors[props.highlightLevel]};
   border-style: solid;
   border-color: ${(props) => props.theme.borderColor};
   border-top-width: 0;
@@ -26,7 +23,7 @@ const CellValue = styled.div`
   align-items: center;
   width: 100%;
   height: 100%;
-  font-size: 2.5rem;
+  font-size: ${(props) => (props.mediumDigitSize ? "1.25rem" : "2.5rem")};
 `;
 
 const CellNotesContainer = styled.div`
@@ -41,14 +38,14 @@ const CellNote = styled.span`
   width: ${(1 / 3) * 100}%;
   height: ${(1 / 3) * 100}%;
   text-align: center;
-  color: ${(props) => (props.highlighted ? "black" : "rgba(0, 0, 0, 0.4)")};
-  font-weight: ${(props) => (props.highlighted ? "bold" : "normal")};
+  color: ${(props) => (props.bolded ? "black" : "rgba(0, 0, 0, 0.4)")};
+  font-weight: ${(props) => (props.bolded ? "bold" : "normal")};
 `;
 
 const CellNotes = ({ notes, selectedNumber }) => (
   <CellNotesContainer>
     {arrayOf((i) => i, 9).map((digit) => (
-      <CellNote key={digit} highlighted={selectedNumber === digit}>
+      <CellNote key={digit} bolded={selectedNumber === digit}>
         {notes.includes(digit) ? digit : " "}
       </CellNote>
     ))}
@@ -60,30 +57,20 @@ const Cell = ({
   thickBottom,
   value,
   notes,
+  highlightLevel,
   selectedNumber,
   click,
-}) => {
-  const isHighlighted = () => {
-    if (selectedNumber === value) return true;
-    if (!value && notes.includes(selectedNumber)) return true;
-    return false;
-  };
-  return (
-    <CellStyles
-      thickRight={thickRight}
-      thickBottom={thickBottom}
-      onClick={click}
-      highlighted={isHighlighted()}
-    >
-      {value ? (
-        <CellValue>
-          <span>{value}</span>
-        </CellValue>
-      ) : (
-        <CellNotes notes={notes} selectedNumber={selectedNumber} />
-      )}
-    </CellStyles>
-  );
-};
+  mediumDigitSize,
+}) => (
+  <CellStyles {...{ thickRight, thickBottom, highlightLevel }} onClick={click}>
+    {value ? (
+      <CellValue mediumDigitSize={mediumDigitSize}>
+        <span>{value}</span>
+      </CellValue>
+    ) : (
+      <CellNotes notes={notes} selectedNumber={selectedNumber} />
+    )}
+  </CellStyles>
+);
 
 export default Cell;

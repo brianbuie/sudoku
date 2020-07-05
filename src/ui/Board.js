@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import shortId from "shortid";
+import React from "react";
 import styled from "styled-components";
 import Cell from "./Cell";
 import arrayOf from "../utils/arrayOf";
@@ -15,47 +14,16 @@ const RowStyles = styled.div`
   display: flex;
 `;
 
-function randomValue() {
-  if (Math.random() < 0.49) return null;
-  return Math.ceil(Math.random() * 9);
-}
-
-function randomNotes() {
-  const notes = [];
-  for (let i = 1; i <= 9; i++) {
-    if (Math.random() > 0.49) notes.push(i);
-  }
-  return notes;
-}
-
-function createCells() {
-  const cells = [];
-  for (let row = 1; row <= 9; row++) {
-    for (let column = 1; column <= 9; column++) {
-      let region = 1;
-      if (column > 3) region++;
-      if (column > 6) region++;
-      if (row > 3) region += 3;
-      if (row > 6) region += 3;
-      cells.push({
-        id: shortId.generate(),
-        row,
-        column,
-        region,
-        notes: randomNotes(),
-        value: randomValue(),
-      });
-    }
-  }
-  return cells;
-}
-
-const Board = ({ selectedNumber, noteMode }) => {
-  const [cells, updateCells] = useState(createCells());
-
-  const updateCellValue = (id, value) => {
-    const { row, column, region } = cells.find((cell) => cell.id === id);
-    updateCells(
+const Board = ({
+  selectedNumber,
+  noteMode,
+  updateBoard,
+  updateCell,
+  cells,
+}) => {
+  const addCellValueAndDeleteNotes = (id, value) => {
+    const { row, column, region } = cells.find((c) => c.id === id);
+    updateBoard(
       cells.map((cell) => {
         if (cell.id === id) return { ...cell, value };
         if (
@@ -72,6 +40,26 @@ const Board = ({ selectedNumber, noteMode }) => {
     );
   };
 
+  const toggleNote = (id, number) => {
+    const cell = cells.find((c) => c.id === id);
+    if (!cell.notes.includes(number))
+      return updateCell(id, { notes: [...cell.notes, number] });
+    return updateCell(id, { notes: cell.notes.filter((i) => i !== number) });
+  };
+
+  const determineHighlightLevel = (cell) => {
+    if (cell.value === selectedNumber) return 2;
+    if (!cell.value && cell.notes.includes(selectedNumber)) return 1;
+    return 0;
+  };
+
+  const handleCellClick = (id) => {
+    const cell = cells.find((c) => c.id === id);
+    if (noteMode) return toggleNote(id, selectedNumber);
+    if (cell.value === selectedNumber) return updateCell(id, { value: null });
+    addCellValueAndDeleteNotes(id, selectedNumber);
+  };
+
   return (
     <BoardStyles>
       {arrayOf((i) => i, 9).map((rowNumber) => (
@@ -84,7 +72,8 @@ const Board = ({ selectedNumber, noteMode }) => {
                 {...cell}
                 thickRight={cell.column % 3 === 0}
                 thickBottom={cell.row % 3 === 0}
-                click={() => updateCellValue(cell.id, selectedNumber)}
+                click={() => handleCellClick(cell.id)}
+                highlightLevel={determineHighlightLevel(cell)}
                 selectedNumber={selectedNumber}
               />
             ))}
